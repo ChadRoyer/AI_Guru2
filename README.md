@@ -45,7 +45,7 @@ A web-based tool that allows users to visually map their workflows and receive A
 
 4. Set up Supabase tables and policies:
    - Create a new Supabase project
-   - Run the SQL queries in the `supabase/` directory to set up tables and policies
+   - Run the `supabase/schema.sql` script in the SQL Editor (or Supabase CLI) to create tables, triggers and RLS policies
 
 5. Start the development server:
    ```
