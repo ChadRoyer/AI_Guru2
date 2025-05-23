@@ -37,15 +37,24 @@ A web-based tool that allows users to visually map their workflows and receive A
    npm install
    ```
 
-3. Set up environment variables:
+3. Create a Supabase project:
+   - Sign in to [Supabase](https://supabase.com/) and create a new project.
+   - In the project dashboard open the **SQL Editor** and run the contents of `supabase/schema.sql` to create the tables, triggers and RLS policies.
+   - From **Settings > API**, copy the `Project URL`, the `anon public` key and the `service_role` key.
+
+4. Configure environment variables:
    ```
    cp .env.local.example .env.local
    ```
-   Then edit `.env.local` to add your Supabase and OpenAI API credentials.
-
-4. Set up Supabase tables and policies:
-   - Create a new Supabase project
-   - Run the `supabase/schema.sql` script in the SQL Editor (or Supabase CLI) to create tables, triggers and RLS policies
+   Edit `.env.local` and fill in the credentials you just copied:
+   ```
+   OPENAI_API_KEY=your_openai_api_key
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   NEXT_PUBLIC_URL=http://localhost:3000
+   ```
+   You can also set `OPENAI_MODEL` if you want to override the default GPT‑ 4.1 model.
 
 5. Start the development server:
    ```
