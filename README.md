@@ -8,6 +8,7 @@ A web-based tool that allows users to visually map their workflows and receive A
 - **AI Opportunities Identification**: Get AI-powered automation suggestions based on your workflow
 - **Implementation Guidance**: Receive detailed guidance on how to implement identified automation opportunities
 - **Organization-based Isolation**: Share workflows with members of your organization
+- **Web Search Integration**: Retrieve real-world AI examples using SerpAPI
 
 ## Tech Stack
 
@@ -15,6 +16,7 @@ A web-based tool that allows users to visually map their workflows and receive A
 - **Data Visualization**: React Flow
 - **Authentication & Database**: Supabase (Auth, PostgreSQL)
 - **AI Integration**: OpenAI GPT-4.1
+- **Web Search**: SerpAPI for external examples
 
 ## Setup Instructions
 
@@ -23,6 +25,7 @@ A web-based tool that allows users to visually map their workflows and receive A
 - Node.js 18+ and npm
 - Supabase account (for database and authentication)
 - OpenAI API key
+- SerpAPI key for web search
 
 ### Installation
 
@@ -49,6 +52,7 @@ A web-based tool that allows users to visually map their workflows and receive A
    Edit `.env.local` and fill in the credentials you just copied:
    ```
    OPENAI_API_KEY=your_openai_api_key
+   SERPAPI_KEY=your_serpapi_key
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
