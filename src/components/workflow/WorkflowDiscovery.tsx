@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import ReactFlow, { ReactFlowProvider, Background, Controls, MiniMap } from 'reactflow';
+import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import 'reactflow/dist/style.css';
 
 interface Message {
@@ -241,14 +243,7 @@ const WorkflowDiscovery = () => {
     setShowDiagram(!showDiagram);
   };
 
-  // Function to format message content with Markdown
-  const formatMessage = (content: string) => {
-    // Simple Markdown formatting for display
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>');
-  };
+
 
   return (
     <div className="flex flex-col h-full max-w-6xl mx-auto">
@@ -277,9 +272,7 @@ const WorkflowDiscovery = () => {
               message.role === 'user' ? 'bg-blue-100 ml-auto' : 'bg-gray-100'
             } max-w-3xl`}
           >
-            <div
-              dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
-            />
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{message.content}</ReactMarkdown>
           </div>
         ))}
         {isLoading && (
