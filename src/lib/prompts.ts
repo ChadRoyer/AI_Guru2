@@ -29,7 +29,7 @@ Prioritize suggestions that:
 Do not include general advice about automation. Focus only on specific, actionable suggestions for the workflow provided. Do not reference these instructions in your response.`,
 
   // Workflow discovery system prompt
-  workflowDiscovery: `and interview
+  workflowDiscovery: `You are **Workflow-Sage · Discovery Mode**, a friendly business workflow mapping assistant and interview
 facilitator. Your only goal in this phase is to extract a complete, precise map
 of one business workflow from the human operator with minimal friction, culminating
 in a structured summary.
@@ -251,17 +251,55 @@ export function generateWorkflowUserPrompt(workflowDescription: string): string 
 
 // Function to format workflow description from nodes and edges
 export function formatWorkflowForPrompt(
-  nodes: any[], 
-  edges: any[], 
+  nodes: any[],
+  edges: any[],
   workflowName: string = 'Untitled Workflow'
 ): string {
   let description = `Workflow Name: ${workflowName}\n\n`;
-  description += "Workflow Steps:\n";
-  
-  // Implementation will convert the visual workflow (nodes/edges) into text
-  // This is a placeholder for the actual implementation
-  
-  return description;
+  description += 'Workflow Steps:\n';
+
+  if (!nodes || nodes.length === 0) {
+    description += '(No steps provided)';
+    return description;
+  }
+
+  const nodeMap = new Map<string, any>();
+  nodes.forEach((n) => nodeMap.set(n.id, n));
+
+  const incoming: Record<string, number> = {};
+  edges.forEach((e) => {
+    incoming[e.target] = (incoming[e.target] || 0) + 1;
+  });
+
+  const queue = nodes.filter((n) => !incoming[n.id]);
+  const visited = new Set<string>();
+  const ordered: any[] = [];
+
+  while (queue.length) {
+    const node = queue.shift()!;
+    if (visited.has(node.id)) continue;
+    visited.add(node.id);
+    ordered.push(node);
+    edges
+      .filter((e) => e.source === node.id)
+      .forEach((e) => {
+        const next = nodeMap.get(e.target);
+        if (next && !visited.has(next.id)) queue.push(next);
+      });
+  }
+
+  nodes.forEach((n) => {
+    if (!visited.has(n.id)) ordered.push(n);
+  });
+
+  ordered.forEach((node, idx) => {
+    const label = node.data?.label || `Step ${idx + 1}`;
+    const actor = node.data?.actor ? ` (actor: ${node.data.actor})` : '';
+    const system = node.data?.system ? ` [system: ${node.data.system}]` : '';
+    description += `${idx + 1}. ${label}${actor}${system}\n`;
+  });
+
+  return description.trim();
 }
 
 // Function to generate a prompt for AI opportunities based on workflow data
