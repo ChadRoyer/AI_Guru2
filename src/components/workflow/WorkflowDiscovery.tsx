@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import ReactFlow, { ReactFlowProvider, Background, Controls, MiniMap } from 'reactflow';
 import ReactMarkdown from 'react-markdown';
-import rehypeSanitize from 'rehype-sanitize';
 import 'reactflow/dist/style.css';
 
 interface Message {
@@ -36,9 +35,18 @@ const WorkflowDiscovery = () => {
   const [showDiagram, setShowDiagram] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const initializationRef = useRef(false);
 
   // Get user session and query parameters
   useEffect(() => {
+    // Prevent duplicate initialization (React StrictMode protection)
+    if (initializationRef.current) {
+      console.log('WorkflowDiscovery already initialized, skipping duplicate');
+      return;
+    }
+    
+    initializationRef.current = true;
+    
     const { conversation_id, workflow_id } = router.query;
     
     const checkSession = async () => {
@@ -125,7 +133,7 @@ const WorkflowDiscovery = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: 'I want to map a business workflow.',
+          message: 'Hello, I need help mapping a business workflow.',
           user_id: userId
         }),
       });
@@ -197,17 +205,22 @@ const WorkflowDiscovery = () => {
       // Add the assistant's response to displayed messages
       setMessages((prev) => [...prev, { role: 'assistant', content: data.message }]);
       
-      // Check if the workflow is complete
-      if (data.is_complete && data.workflow_id) {
+      // Prefer immediate diagram data from payload when available
+      if (data.diagram_data) {
         setWorkflowComplete(true);
-        
-        // Fetch the updated workflow data with diagram
+        setWorkflowData(data.workflow_data);
+        setDiagramData(data.diagram_data);
+        if (data.workflow_id) setWorkflowId(data.workflow_id);
+      } else if (data.is_complete && data.workflow_id) {
+        // Legacy fallback: fetch from DB if diagram not in payload
+        setWorkflowComplete(true);
+
         const { data: workflow, error } = await supabase
           .from('workflows')
           .select('workflow_data, diagram_data')
           .eq('id', data.workflow_id)
           .single();
-          
+
         if (!error && workflow) {
           setWorkflowData(workflow.workflow_data);
           setDiagramData(workflow.diagram_data);
@@ -243,8 +256,6 @@ const WorkflowDiscovery = () => {
     setShowDiagram(!showDiagram);
   };
 
-
-
   return (
     <div className="flex flex-col h-full max-w-6xl mx-auto">
       {showDiagram && diagramData && (
@@ -272,7 +283,7 @@ const WorkflowDiscovery = () => {
               message.role === 'user' ? 'bg-blue-100 ml-auto' : 'bg-gray-100'
             } max-w-3xl`}
           >
-            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{message.content}</ReactMarkdown>
+            <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         ))}
         {isLoading && (

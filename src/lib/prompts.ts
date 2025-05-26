@@ -148,7 +148,9 @@ After confirmation, structure this information into a JSON object following this
     "...",
     ...
   ]
-}`,
+}
+
+IMPORTANT: When you output this JSON object, OUTPUT ONLY the pure JSON text. Do NOT wrap it in triple backticks or any Markdown code fences, and do NOT add any explanatory text before or after.`,
 
   // AI Opportunities identification prompt
   aiOpportunities: `You are **Workflow-Sage · AI-Opportunity Mode**.

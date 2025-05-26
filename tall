@@ -1,0 +1,10 @@
+[33ma8ccbae[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Merge pull request #6 from ChadRoyer/feat/ai-opps-web-search
+[33m1975cd0[m feat: Integrate web search into AI opportunity generation
+[33mad96aa2[m Merge pull request #5 from ChadRoyer/codex/add-search-api-for-urls
+[33m21e9e17[m Add SerpAPI web search integration
+[33m11b48c3[m Merge pull request #4 from ChadRoyer/codex/update-readme-with-supabase-setup-instructions
+[33m3f374a5[m docs: expand supabase setup instructions
+[33m9149241[m Merge pull request #3 from ChadRoyer/codex/replace-dangerouslysetinnerhtml-with-markdown-library-for-sa
+[33m6e6aa99[m Use Markdown library for assistant messages
+[33ma9a8aa1[m Merge pull request #2 from ChadRoyer/codex/update-workflowdiscovery-in-prompts.ts
+[33mce684fc[m Complete workflow discovery prompt and implement workflow formatting

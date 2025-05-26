@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
@@ -8,7 +8,10 @@ export default function Login() {
   const [companyName, setCompanyName] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const router = useRouter();
+  const loginInProgressRef = useRef(false);
+  const demoInProgressRef = useRef(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -24,6 +27,14 @@ export default function Login() {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Prevent duplicate requests (React StrictMode protection)
+    if (loginInProgressRef.current || loading) {
+      console.log('Login already in progress, skipping duplicate request');
+      return;
+    }
+    
+    loginInProgressRef.current = true;
     setLoading(true);
     setMessage('');
 
@@ -60,6 +71,60 @@ export default function Login() {
       setMessage(error.message || 'An error occurred during login');
     } finally {
       setLoading(false);
+      loginInProgressRef.current = false;
+    }
+  };
+
+  const handleDemoMode = async () => {
+    // Prevent duplicate requests
+    if (demoInProgressRef.current || demoLoading) {
+      console.log('Demo mode already in progress, skipping duplicate request');
+      return;
+    }
+    
+    demoInProgressRef.current = true;
+    setDemoLoading(true);
+    setMessage('Setting up demo environment...');
+
+    try {
+      const response = await fetch('/api/demoMode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Demo setup failed');
+      }
+      
+      // Store the demo session in Supabase client
+      if (data.session) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+        
+        // Redirect to workflow discovery with demo conversation
+        router.push({
+          pathname: '/workflow-discovery',
+          query: {
+            conversation_id: data.conversation_id,
+            workflow_id: data.workflow_id,
+            demo: 'true'
+          }
+        });
+      } else {
+        throw new Error('No demo session data received');
+      }
+    } catch (error: any) {
+      console.error('Error during demo setup:', error);
+      setMessage(error.message || 'An error occurred setting up the demo');
+    } finally {
+      setDemoLoading(false);
+      demoInProgressRef.current = false;
     }
   };
 
@@ -104,7 +169,7 @@ export default function Login() {
           
           <button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || demoLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign In'}
@@ -116,6 +181,25 @@ export default function Login() {
             </div>
           )}
         </form>
+
+        {/* Demo Mode Section */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-4">
+              Want to see how it works first?
+            </p>
+            <button
+              onClick={handleDemoMode}
+              disabled={loading || demoLoading}
+              className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              {demoLoading ? 'Setting up demo...' : '🚀 Try Demo'}
+            </button>
+            <p className="text-xs text-gray-500 mt-2">
+              Experience a complete workflow mapping session with sample data
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
